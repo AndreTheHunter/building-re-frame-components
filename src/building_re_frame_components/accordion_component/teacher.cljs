@@ -3,9 +3,9 @@
             [re-frame.core :as rf]))
 
 (rf/reg-event-db
- :teacher/initialize
- (fn [_ _]
-   {}))
+  :teacher/initialize
+  (fn [_ _]
+    {}))
 
 (defn accordion [options & children]
   (let [s (reagent/atom {:current (:active options)})]
@@ -16,19 +16,19 @@
         [:div
          (for [[i header content] i-h-c]
            [:div
-            [:div {:style {:background-color "#aaa"}
+            [:div {:style    {:background-color "#aaa"}
                    :on-click (fn []
                                (swap! s update :current
                                       #(if (= i %) nil i)))}
              header]
             [:div
              {:style {:background-color "#ccc"
-                      :height (if (= i (:current @s))
-                                (when-let [el (get-in @s [:refs i])]
-                                  (.-clientHeight el))
-                                0)
-                      :overflow :hidden
-                      :transition "height 0.2s"}}
+                      :height           (if (= i (:current @s))
+                                          (when-let [el (get-in @s [:refs i])]
+                                            (.-clientHeight el))
+                                          0)
+                      :overflow         :hidden
+                      :transition       "height 0.2s"}}
              [:div
               {:ref #(swap! s assoc-in [:refs i] %)}
               content]]])]))))

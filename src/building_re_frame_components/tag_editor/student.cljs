@@ -3,9 +3,9 @@
             [re-frame.core :as rf]))
 
 (rf/reg-event-db
- :initialize
- (fn [db _]
-   (select-keys db (filter #(= "teacher" (namespace %)) (keys db)))))
+  :initialize
+  (fn [db _]
+    (select-keys db (filter #(= "teacher" (namespace %)) (keys db)))))
 
 (defn ui []
   [:div

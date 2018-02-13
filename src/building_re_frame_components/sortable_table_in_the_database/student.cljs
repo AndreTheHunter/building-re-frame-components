@@ -16,7 +16,7 @@
   :initialize
   (fn [db _]
     (assoc db :tables {:new-hope {:header (first data)
-                         :rows (rest data)}})))
+                                  :rows   (rest data)}})))
 
 (rf/reg-sub
   :table
@@ -50,9 +50,9 @@
                                   :sort-direction :descending))}
              [:div {:style {:display :inline-block}}
               h]
-             [:div {:style {:display :inline-block
+             [:div {:style {:display     :inline-block
                             :line-height :1em
-                            :font-size :60%}}
+                            :font-size   :60%}}
               [:div
                {:style {:color (if (= [i :descending] sorts)
                                  :black

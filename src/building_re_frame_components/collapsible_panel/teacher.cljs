@@ -1,7 +1,7 @@
 (ns building-re-frame-components.collapsible-panel.teacher
   (:require [reagent.core :as reagent]
             [re-frame.core :as rf]))
- 
+
 (rf/reg-event-db
   :teacher/initialize
   (fn [_ _]
@@ -30,19 +30,19 @@
             child-height (:child-height @s)]
         [:div
          [:div {:on-click #(rf/dispatch [:teacher/toggle-panel id])
-                :style {:background-color "#ddd"
-                        :padding "0 1em"}}
+                :style    {:background-color "#ddd"
+                           :padding          "0 1em"}}
           [:div {:style {:float "right"}}
            (if open? "-" "+")]
           title]
-         [:div {:style  {:overflow "hidden"
-                         :transition "max-height 0.8s"
-                         :max-height (if open? child-height 0)}}
-          [:div {:ref #(when %
-                         (swap! s assoc :child-height (.-clientHeight %)))
+         [:div {:style {:overflow   "hidden"
+                        :transition "max-height 0.8s"
+                        :max-height (if open? child-height 0)}}
+          [:div {:ref   #(when %
+                           (swap! s assoc :child-height (.-clientHeight %)))
                  :style {:background-color "#eee"
-                         :padding "0 1em"}
-                 }
+                         :padding          "0 1em"}}
+
            children]]]))))
 
 (defn ui []

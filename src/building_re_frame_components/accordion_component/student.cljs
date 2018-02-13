@@ -3,9 +3,9 @@
             [re-frame.core :as rf]))
 
 (rf/reg-event-db
- :initialize
- (fn [_ _]
-   {}))
+  :initialize
+  (fn [_ _]
+    {}))
 
 (defn ui []
   [:div

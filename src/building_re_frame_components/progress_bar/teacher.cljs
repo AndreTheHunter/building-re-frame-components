@@ -22,8 +22,8 @@
 (rf/dispatch-sync [:teacher/set-total 100])
 
 (defonce _interval (js/setInterval
-                    #(rf/dispatch-sync [:teacher/inc-done 3])
-                    1000))
+                     #(rf/dispatch-sync [:teacher/inc-done 3])
+                     1000))
 
 (rf/reg-sub
   :teacher/total
@@ -32,25 +32,25 @@
 (rf/reg-sub
   :teacher/done
   (fn [db] (:teacher/done db)))
-  
+
 (defn progress [done]
   (let [s (reagent/atom {})]
     (fn [done]
       (let [done (str (.toFixed (* 100 done) 1) "%")]
-        [:div {:style {:position :relative
+        [:div {:style {:position    :relative
                        :line-height "1.3em"}}
-         [:div {:style {:background-color :green 
-                        :top 0
-                        :bottom 0
-                        :transition "width 0.1s"
-                        :width done
-                        :position :absolute
-                        :overflow :hidden}}
+         [:div {:style {:background-color :green
+                        :top              0
+                        :bottom           0
+                        :transition       "width 0.1s"
+                        :width            done
+                        :position         :absolute
+                        :overflow         :hidden}}
           [:span {:style {:margin-left (:left @s)
-                          :color :white}}
+                          :color       :white}}
            done]]
          [:div {:style {:text-align :center}}
-          [:span 
+          [:span
            {:ref #(if %
                     (swap! s assoc :left (.-offsetLeft %))
                     (swap! s assoc :left 0))}

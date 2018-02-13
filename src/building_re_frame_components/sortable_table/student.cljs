@@ -13,9 +13,9 @@
    ])
 
 (rf/reg-event-db
- :initialize
- (fn [db _]
-   {}))
+  :initialize
+  (fn [db _]
+    {}))
 
 (defn ui []
   [:div

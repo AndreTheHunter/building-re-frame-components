@@ -5,59 +5,59 @@
             [ajax.core :as ajax]))
 
 (rf/reg-event-db
- :teacher/initialize
- (fn [db _]
-   (select-keys db (remove #(= "teacher" (namespace %)) (keys db)))))
+  :teacher/initialize
+  (fn [db _]
+    (select-keys db (remove #(= "teacher" (namespace %)) (keys db)))))
 
 (rf/reg-sub
- :teacher/username-cache
- (fn [db _]
-   (get db :teacher/username-cache {})))
+  :teacher/username-cache
+  (fn [db _]
+    (get db :teacher/username-cache {})))
 
 (rf/reg-event-fx
- :teacher/console-log
- (fn [_ [_ data]]
-   (js/console.log data)
-   {}))
+  :teacher/console-log
+  (fn [_ [_ data]]
+    (js/console.log data)
+    {}))
 
 (rf/reg-event-db
- :teacher/save-username
- (fn [db [_ {:keys [username exists]}]]
-   (assoc-in db [:teacher/username-cache username]
-             (if exists :taken :free))))
+  :teacher/save-username
+  (fn [db [_ {:keys [username exists]}]]
+    (assoc-in db [:teacher/username-cache username]
+              (if exists :taken :free))))
 
 (rf/reg-event-fx
- :teacher/check-username
- (fn [ctx [_ username]]
-   {:http-xhrio {:uri "https://whispering-cove-34851.herokuapp.com/users"
-                 :params {:u username}
-                 :method :get
-                 :timeout 10000
-                 :response-format (ajax/json-response-format {:keywords? true})
-                 :on-success [:teacher/save-username]
-                 :on-failure [:teacher/console-log]}}))
+  :teacher/check-username
+  (fn [ctx [_ username]]
+    {:http-xhrio {:uri             "https://whispering-cove-34851.herokuapp.com/users"
+                  :params          {:u username}
+                  :method          :get
+                  :timeout         10000
+                  :response-format (ajax/json-response-format {:keywords? true})
+                  :on-success      [:teacher/save-username]
+                  :on-failure      [:teacher/console-log]}}))
 
 (defonce timeouts (atom {}))
 
 (rf/reg-fx
- :teacher/timeout
- (fn [[key time event]]
-   (when-some [to (get @timeouts key)]
-     (js/clearTimeout to)
-     (swap! timeouts dissoc key))
-   (when (some? event)
-     (swap! timeouts assoc key
-            (js/setTimeout
-             #(rf/dispatch event)
-             time)))))
+  :teacher/timeout
+  (fn [[key time event]]
+    (when-some [to (get @timeouts key)]
+      (js/clearTimeout to)
+      (swap! timeouts dissoc key))
+    (when (some? event)
+      (swap! timeouts assoc key
+             (js/setTimeout
+               #(rf/dispatch event)
+               time)))))
 
 (rf/reg-event-fx
- :teacher/check-username-debounce
- (fn [ctx [_ username]]
-   {:timeout (if (>= (count username) 3)
-               [:teacher/check-username 300 [:teacher/check-username username]]
-               ;; will remove timeout
-               [:teacher/check-username 0 nil])}))
+  :teacher/check-username-debounce
+  (fn [ctx [_ username]]
+    {:timeout (if (>= (count username) 3)
+                [:teacher/check-username 300 [:teacher/check-username username]]
+                ;; will remove timeout
+                [:teacher/check-username 0 nil])}))
 
 (def password-validations
   [["At least 12 characters."
@@ -98,20 +98,20 @@
 
 (defn render-validations [validations show-status?]
   (doall
-   (for [[desc status] validations]
-     (status-line desc status show-status?))))
+    (for [[desc status] validations]
+      (status-line desc status show-status?))))
 
 (defn status->icon [status]
   (case status
-    :pass    [:span [:i.fa.fa-check]           " "]
-    :fail    [:span [:i.fa.fa-remove]          " "]
+    :pass [:span [:i.fa.fa-check] " "]
+    :fail [:span [:i.fa.fa-remove] " "]
     :loading [:span [:i.fa.fa-spinner.fa-spin] " "]))
 
 (defn labeled-box [{:keys [label state type extra on-change
                            validations validation-args
                            key]
-                    :or {on-change (fn [])
-                         type :text}}]
+                    :or   {on-change (fn [])
+                           type      :text}}]
   (let [info (get @state key)
 
         {:keys [validations status]}
@@ -125,19 +125,19 @@
       (when (:dirty? info)
         (status->icon status))
       label]
-     [:input {:type type
-              :style {:width "100%"
-                      :border (str "1px solid " color)}
-              :value (:value info)
-              :on-focus #(swap! state assoc-in [key :focus?] true)
-              :on-blur  #(swap! state assoc-in [key :dirty?] true)
+     [:input {:type      type
+              :style     {:width  "100%"
+                          :border (str "1px solid " color)}
+              :value     (:value info)
+              :on-focus  #(swap! state assoc-in [key :focus?] true)
+              :on-blur   #(swap! state assoc-in [key :dirty?] true)
               :on-change (fn [e]
                            (let [v (-> e .-target .-value)]
                              (on-change v)
                              (swap! state
                                     #(-> %
                                          (assoc-in [key :dirty?] true)
-                                         (assoc-in [key :value ] v)))))}]
+                                         (assoc-in [key :value] v)))))}]
      extra
      (when (:focus? info)
        (render-validations validations (:dirty? info)))]))
@@ -176,50 +176,50 @@
     :pass))
 
 (defn password-box [s]
-  (labeled-box {:label "Password"
+  (labeled-box {:label       "Password"
                 :validations password-validations
-                :state s
-                :key :password
-                :type (if (:show? (:password @s)) :text :password)
-                :extra [:label [:input {:type :checkbox
-                                        :checked (:show? (:password @s))
-                                        :on-change #(swap! s assoc-in
-                                                           [:password :show?] (-> % .-target .-checked))}]
-                        " Show password?"]}))
+                :state       s
+                :key         :password
+                :type        (if (:show? (:password @s)) :text :password)
+                :extra       [:label [:input {:type      :checkbox
+                                              :checked   (:show? (:password @s))
+                                              :on-change #(swap! s assoc-in
+                                                                 [:password :show?] (-> % .-target .-checked))}]
+                              " Show password?"]}))
 
 (defn username-box [s]
-  (labeled-box {:label "Username"
-                :type :text
-                :state s
-                :key :username
-                :validations username-validations
+  (labeled-box {:label           "Username"
+                :type            :text
+                :state           s
+                :key             :username
+                :validations     username-validations
                 :validation-args [@(rf/subscribe [:teacher/username-cache])]
-                :on-change #(rf/dispatch [:teacher/check-username-debounce %])}))
+                :on-change       #(rf/dispatch [:teacher/check-username-debounce %])}))
 
 (rf/reg-event-db
- :teacher/save-user
- (fn [db [_ user]]
-   (assoc db :teacher/current-user user)))
+  :teacher/save-user
+  (fn [db [_ user]]
+    (assoc db :teacher/current-user user)))
 
 (rf/reg-event-fx
- :teacher/user-reg
- (fn [cofx [_ username password]]
-   {:http-xhrio {:uri "https://whispering-cove-34851.herokuapp.com/users"
-                 :params {:u username :p password}
-                 :method :post
-                 :timeout 10000
-                 :format (ajax/url-request-format)
-                 :response-format (ajax/json-response-format {:keywords? true})
-                 :on-success [:teacher/save-user]
-                 :on-failure [:teacher/console-log]}
-    :db (assoc (:db cofx) :teacher/current-user [:loading])}))
+  :teacher/user-reg
+  (fn [cofx [_ username password]]
+    {:http-xhrio {:uri             "https://whispering-cove-34851.herokuapp.com/users"
+                  :params          {:u username :p password}
+                  :method          :post
+                  :timeout         10000
+                  :format          (ajax/url-request-format)
+                  :response-format (ajax/json-response-format {:keywords? true})
+                  :on-success      [:teacher/save-user]
+                  :on-failure      [:teacher/console-log]}
+     :db         (assoc (:db cofx) :teacher/current-user [:loading])}))
 
 (defn username-password []
   (let [s (reagent/atom {})]
     (fn []
       (let [status (combine-statuses
-                    (get-in @s [:username :status] :loading)
-                    (get-in @s [:password :status] :loading))]
+                     (get-in @s [:username :status] :loading)
+                     (get-in @s [:password :status] :loading))]
         [:form
          {:on-submit
           (fn [e]
@@ -232,7 +232,7 @@
          [password-box s]
          [:button
           {:disabled (not= :pass status)
-           :type :submit}
+           :type     :submit}
           "Register"]]))))
 
 (defn show-user []
@@ -245,49 +245,49 @@
   [:div [:i.fa.fa-spinner.fa-spin]])
 
 (rf/reg-sub
- :teacher/current-user
- (fn [db]
-   (get db :teacher/current-user)))
+  :teacher/current-user
+  (fn [db]
+    (get db :teacher/current-user)))
 
 (rf/reg-sub
- :teacher/reg-started?
- (fn [db]
-   (get db :teacher/reg-started?)))
+  :teacher/reg-started?
+  (fn [db]
+    (get db :teacher/reg-started?)))
 
 (rf/reg-event-db
- :teacher/start-reg
- (fn [db]
-   (assoc db :teacher/reg-started? true)))
+  :teacher/start-reg
+  (fn [db]
+    (assoc db :teacher/reg-started? true)))
 
 (defn start-button []
   [:button {:on-click #(rf/dispatch [:teacher/start-reg])}
    "Register"])
 
 (rf/reg-event-fx
- :teacher/save-avatar
- (fn [cofx [_ form-data]]
-   {:http-xhrio {:uri "https://whispering-cove-34851.herokuapp.com/avatar"
-                 :body form-data
-                 :method :post
-                 :timeout 10000
-                 :response-format (ajax/json-response-format {:keywords? true})
-                 :on-success [:teacher/save-user]
-                 :on-failure [:teacher/console-log]}
-    :db (assoc-in (:db cofx) [:teacher/current-user :avatar] [:loading])}))
+  :teacher/save-avatar
+  (fn [cofx [_ form-data]]
+    {:http-xhrio {:uri             "https://whispering-cove-34851.herokuapp.com/avatar"
+                  :body            form-data
+                  :method          :post
+                  :timeout         10000
+                  :response-format (ajax/json-response-format {:keywords? true})
+                  :on-success      [:teacher/save-user]
+                  :on-failure      [:teacher/console-log]}
+     :db         (assoc-in (:db cofx) [:teacher/current-user :avatar] [:loading])}))
 
 (defn select-avatar []
   (let [s (reagent/atom {})
         current-user (rf/subscribe [:teacher/current-user])]
     (fn []
       [:form
-       {:ref #(swap! s assoc :form %)
+       {:ref       #(swap! s assoc :form %)
         :on-submit (fn [e]
                      (.preventDefault e))}
        [:div (:username @current-user)]
        "Upload avatar picture"
-       [:input {:type :hidden :name :u
+       [:input {:type  :hidden :name :u
                 :value (:username @current-user)}]
-       [:input {:type :file :name :image
+       [:input {:type      :file :name :image
                 :on-change (fn [e]
                              (.preventDefault e)
                              (rf/dispatch [:teacher/save-avatar
@@ -303,7 +303,7 @@
 
     (nil? (:avatar user))
     :avatar
-    
+
     (= [:loading] (:avatar user))
     :loading
 
@@ -323,7 +323,7 @@
 
 (defn user-registration []
   (let [current-user @(rf/subscribe [:teacher/current-user])
-        started?     @(rf/subscribe [:teacher/reg-started?])]
+        started? @(rf/subscribe [:teacher/reg-started?])]
     [:div
      (case (reg-start started? (reg-step current-user))
        :user
@@ -342,8 +342,8 @@
        [start-button])]))
 
 (rf/reg-sub
- :teacher/world
- (fn [db] db))
+  :teacher/world
+  (fn [db] db))
 
 (defn ui []
   [:div

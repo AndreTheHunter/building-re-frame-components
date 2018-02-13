@@ -6,8 +6,8 @@
   :initialize
   (fn [db _]
     (assoc db :movies {"tt0095989"
-              {:title "Return of the Killer Tomatoes!"
-               :description "Crazy old Professor Gangreen has developed a way to make tomatoes look human for a second invasion."}})))
+                       {:title       "Return of the Killer Tomatoes!"
+                        :description "Crazy old Professor Gangreen has developed a way to make tomatoes look human for a second invasion."}})))
 
 (rf/reg-sub
   :movies

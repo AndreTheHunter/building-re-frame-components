@@ -13,15 +13,15 @@
    ])
 
 (rf/reg-event-db
- :teacher/initialize
- (fn [db _]
-   (assoc db :teacher/tables {:new-hope {:header (first data)
-                                         :rows (rest data)}})))
+  :teacher/initialize
+  (fn [db _]
+    (assoc db :teacher/tables {:new-hope {:header (first data)
+                                          :rows   (rest data)}})))
 
 (rf/reg-sub
- :teacher/table
- (fn [db [_ key]]
-   (get-in db [:teacher/tables key])))
+  :teacher/table
+  (fn [db [_ key]]
+    (get-in db [:teacher/tables key])))
 
 (defn sortable-table [table-key]
   (let [s (reagent/atom {})]
@@ -30,8 +30,8 @@
             key (:sort-key @s)
             dir (:sort-direction @s)
             rows (cond->> (:rows table)
-                   key (sort-by #(nth % key))
-                   (= :ascending dir) reverse)
+                          key (sort-by #(nth % key))
+                          (= :ascending dir) reverse)
             sorts [key dir]]
         [:table {:style {:font-size "80%"}}
          [:tr
@@ -50,9 +50,9 @@
                                   :sort-direction :descending))}
              [:div {:style {:display :inline-block}}
               h]
-             [:div {:style {:display :inline-block
+             [:div {:style {:display     :inline-block
                             :line-height :1em
-                            :font-size :60%}}
+                            :font-size   :60%}}
               [:div
                {:style {:color (if (= [i :descending] sorts)
                                  :black

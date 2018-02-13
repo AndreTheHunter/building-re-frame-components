@@ -14,13 +14,13 @@
 
 (defn markdown-section [s]
   [:div
-    {:dangerouslySetInnerHTML {:__html (->html s)}}])
+   {:dangerouslySetInnerHTML {:__html (->html s)}}])
 
 (defn markdown-editor-with-preview [initial-val]
   (let [s (reagent/atom {:value initial-val})]
     (fn []
       [:div
-       [:textarea {:value (:value @s)
+       [:textarea {:value     (:value @s)
                    :on-change (fn [e]
                                 (swap! s assoc
                                        :value (-> e .-target .-value)))}]

@@ -29,13 +29,13 @@
 (rf/reg-event-fx
   :check-username
   (fn [ctx [_ username]]
-    {:http-xhrio {:uri "https://whispering-cove-34851.herokuapp.com/users"
-                  :params {:u username}
-                  :method :get
-                  :timeout 10000
+    {:http-xhrio {:uri             "https://whispering-cove-34851.herokuapp.com/users"
+                  :params          {:u username}
+                  :method          :get
+                  :timeout         10000
                   :response-format (ajax/json-response-format {:keywords? true})
-                  :on-success [:save-username]
-                  :on-failure [:console-log]}}))
+                  :on-success      [:save-username]
+                  :on-failure      [:console-log]}}))
 
 (defonce timeouts (atom {}))
 
@@ -43,8 +43,8 @@
   :timeout
   (fn [[key time event]]
     (when-some [to (get @timeouts key)]
-               (js/clearTimeout to)
-               (swap! timeouts dissoc key))
+      (js/clearTimeout to)
+      (swap! timeouts dissoc key))
     (when (some? event)
       (swap! timeouts assoc key
              (js/setTimeout
@@ -77,7 +77,7 @@
 
 (defn labeled-box [{:keys [label state type extra on-change
                            validations validation-args]
-                    :or {on-change (fn [])}}]
+                    :or   {on-change (fn [])}}]
   (let [info @state
         validations (for [[desc f] validations]
                       [desc (apply f (:value info) validation-args)])
@@ -89,12 +89,12 @@
                   :loading nil))]
     [:div
      [:label {:style {:color color}} label]
-     [:input {:type type
-              :style {:width "100%"
-                      :border (str "1px solid " color)}
-              :value (:value info)
-              :on-focus #(swap! state assoc :focus? true)
-              :on-blur  #(swap! state assoc :dirty? true)
+     [:input {:type      type
+              :style     {:width  "100%"
+                          :border (str "1px solid " color)}
+              :value     (:value info)
+              :on-focus  #(swap! state assoc :focus? true)
+              :on-blur   #(swap! state assoc :dirty? true)
               :on-change (fn [e]
                            (let [v (-> e .-target .-value)]
                              (on-change v)
@@ -106,7 +106,7 @@
        (for [[desc status] validations]
          (when (:focus? info)
            [:div
-            {:key desc
+            {:key   desc
              :style {:color (when (:dirty? info)
                               (case status
                                 :pass "green"
@@ -155,26 +155,26 @@
 (defn password-box []
   (let [s (reagent/atom {})]
     (fn []
-      (labeled-box {:label "Password"
+      (labeled-box {:label       "Password"
                     :validations password-validations
-                    :state s
-                    :type (if (:show? @s) :text :password)
-                    :extra [:label [:input {:type :checkbox
-                                            :checked (:show? @s)
-                                            :on-change #(swap! s assoc
-                                                               :show? (-> % .-target .-checked))}]
-                            " Show password?"]}))))
+                    :state       s
+                    :type        (if (:show? @s) :text :password)
+                    :extra       [:label [:input {:type      :checkbox
+                                                  :checked   (:show? @s)
+                                                  :on-change #(swap! s assoc
+                                                                     :show? (-> % .-target .-checked))}]
+                                  " Show password?"]}))))
 
 (defn username-box []
   (let [s (reagent/atom {})
         cache (rf/subscribe [:username-cache])]
     (fn []
-      (labeled-box {:label "Username"
-                    :type :text
-                    :state s
-                    :validations username-validations
+      (labeled-box {:label           "Username"
+                    :type            :text
+                    :state           s
+                    :validations     username-validations
                     :validation-args [@cache]
-                    :on-change #(rf/dispatch [:check-username-debounce %])}))))
+                    :on-change       #(rf/dispatch [:check-username-debounce %])}))))
 
 (defn user-registration []
   [:div
