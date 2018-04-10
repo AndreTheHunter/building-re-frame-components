@@ -1,17 +1,23 @@
 (ns building-re-frame-components.externally-managed-components.student
-  (:require [reagent.core :as reagent]
-            [re-frame.core :as rf]))
+  (:require
+    [reagent.core :as reagent]))
 
-(rf/reg-event-db
-  :initialize
-  (fn [_ _]
-    {}))
+(defn create-codemirror [elem options]
+  (js/CodeMirror. elem (clj->js options)))
 
+(defn codemirror [initial-value options on-blur]
+  (reagent/create-class
+    {:reagent-render      (constantly [:div])
+     :component-did-mount (fn [this]
+                            (doto (create-codemirror (reagent/dom-node this)
+                                                     (assoc options :value initial-value))
+                              (.on "blur" #(when on-blur (on-blur (.getValue %))))))}))
 
 (defn ui []
-  [:div
-   "Put the CodeMirror editor here."])
+  [codemirror "This is a CodeMirror editor.
+
+Try focusing then blurring."
+   {:lineNumbers true} println])
 
 (when-some [el (js/document.getElementById "externally-managed-components--student")]
-  (defonce _init (rf/dispatch-sync [:initialize]))
   (reagent/render [ui] el))
