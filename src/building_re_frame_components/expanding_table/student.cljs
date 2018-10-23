@@ -1,6 +1,7 @@
 (ns building-re-frame-components.expanding-table.student
-  (:require [reagent.core :as reagent]
-            [re-frame.core :as rf]))
+  (:require
+    [reagent.core :as reagent]
+    [re-frame.core :as rf]))
 
 (def data
   {"US"     {:population 321000000
@@ -16,19 +17,58 @@
                           "Marseille" 808000
                           "Lyon"      422000}}})
 
-(rf/reg-event-db
-  :initialize
+(rf/reg-event-db :initialize
   (fn [db _]
     (assoc db :tables {:population data})))
 
-(rf/reg-sub
-  :table
+(rf/reg-sub :table
   (fn [db [_ key]]
     (get-in db [:tables key])))
 
+(defn nested-table [table-key]
+  (let [s (reagent/atom {})]
+    (fn [table-key]
+      (let [table @(rf/subscribe [:table table-key])]
+        [:div
+         [:table {:style {:font-size "80%"}}
+          [:tr
+           (doall
+             (for [h ["Country" "Population" "Cities"]]
+               [:th
+                {:key h}
+                [:div {:style {:display :inline-block}}
+                 h]]))]
+          (doall
+            (for [[country data] table]
+              (list
+                [:tr {:key country
+                      :on-click #(swap! s update :expand dissoc country)}
+                 [:td country]
+                 [:td (:population data)]
+                 [:td
+                  (if (get-in @s [:expand country])
+                    [:div
+                     {:on-click #(swap! s update :expand dissoc country)}
+                     "-"]
+                    [:div
+                     {:on-click #(swap! s assoc-in [:expand country] true)}
+                     "+"])]]
+                (when (get-in @s [:expand country])
+                  (doall
+                    (for [[city pop] (:cities data)]
+                      [:tr
+                       {:key   city
+                        :style {:background-color "#888"
+                                :line-height      "1em"}}
+                       [:td {:style {:padding-left "2em"}}
+                        city]
+                       [:td pop]
+                       [:td]]))))))]
+         (pr-str @s)]))))
+
 (defn ui []
   [:div
-   "Put table here"])
+   [nested-table :population]])
 
 (when-some [el (js/document.getElementById "expanding-table--student")]
   (defonce _init (rf/dispatch-sync [:initialize]))
